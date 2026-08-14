@@ -12,15 +12,13 @@ eel.init('web')
 
 @eel.expose 
 def get_system_stats():
-    # Donanım verilerini çek
     cpu = psutil.cpu_percent(interval=0.5)
     ram = psutil.virtual_memory().percent
     return {"cpu": cpu, "ram": ram}
 
 @eel.expose
 def optimize_system():
-    # Burası optimizasyonun yapılacağı yer (şimdilik test mesajı)
     return "Sistem Optimize Edildi!"
 
-# Uygulamayı başlat
-eel.start('index.html', size=(1100, 700), mode='chrome')
+# Varsayılan tarayıcıyla başlatma (Chrome hatası almamak için mode='default')
+eel.start('index.html', size=(1100, 700), mode='default')
