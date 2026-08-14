@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>GAMEXAN PRO</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="/eel.js"></script> 
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><span class="logo-icon">G</span> GAMEXAN</div>
+        <ul class="nav-links">
+            <li><a href="#">Keşfet</a></li>
+            <li><a href="#">Özellikler</a></li>
+            <li><a href="#">Sistem</a></li>
+        </ul>
+        <button class="btn-action" onclick="startBoost()">Optimize Et</button>
+    </nav>
+
+    <main>
+        <div class="hero">
+            <h1>Sistemin Sınırlarını Aş.</h1>
+            <p>Oyun performansını en üst düzeye çıkar, gecikmeyi yok et.</p>
+        </div>
+
+        <div class="card-grid">
+            <div class="card bg-glow-purple">
+                <div class="icon">🛡️</div>
+                <h3>Otomatik FPS</h3>
+                <p>Arka plan gereksiz servisleri kapatılır, oyun performansı anında maksimuma çekilir.</p>
+            </div>
+            <div class="card bg-glow-blue">
+                <div class="icon">⚡</div>
+                <h3>Tek Tıkla Bypass</h3>
+                <p>İşlemci ve RAM öncelikleri oyuna verilir. Gecikme sıfıra indirilir.</p>
+            </div>
+            <div class="card bg-glow-green">
+                <div class="icon">📊</div>
+                <h3>Sistem İzleme</h3>
+                <p id="hardware-stats">Donanım verileri okunuyor...</p>
+            </div>
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
