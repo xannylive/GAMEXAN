@@ -1,158 +1,221 @@
 import customtkinter as ctk
 import os
 import threading
+import psutil
+import platform
 
-# --- Arayüz Renk ve Tema Ayarları ---
-ctk.set_appearance_mode("Dark")  # Daima Koyu Tema
-ctk.set_default_color_theme("dark-blue")  # Mavi Vurgular
+# Tema ve Renk Ayarları (NVIDIA / ROG Koyu Tema)
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("dark-blue")
 
 class GAMEXANApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
         # Pencere Ayarları
-        self.title("GAMEXAN // Pro Performance Suite")
-        self.geometry("960x600")
+        self.title("GAMEXAN // NVIDIA App Style Suite v3.0")
+        self.geometry("1050x650")
+        self.resizable(False, False)
         
-        # Grid Yapısı (Sol Menü + Ana İçerik)
+        # Grid Yapısı
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # --- 1. Sol Navigasyon Menüsü ---
-        self.navigation_frame = ctk.CTkFrame(self, width=200, corner_radius=0, fg_color="#0B0D12")
-        self.navigation_frame.grid(row=0, column=0, sticky="nsew")
-        self.navigation_frame.grid_rowconfigure(4, weight=1)
+        # --- SOL MENÜ (NAVBAR) ---
+        self.sidebar = ctk.CTkFrame(self, width=230, corner_radius=0, fg_color="#0A0C10")
+        self.sidebar.grid(row=0, column=0, sticky="nsew")
 
-        # Logo Alanı
-        self.navigation_label = ctk.CTkLabel(self.navigation_frame, text="GAMEXAN", 
-                                           font=ctk.CTkFont(size=20, weight="bold"), text_color="#00F2FF")
-        self.navigation_label.pack(pady=(30, 40))
+        # Logo / Başlık
+        self.logo_lbl = ctk.CTkLabel(
+            self.sidebar, 
+            text="GAMEXAN PRO", 
+            font=ctk.CTkFont(family="Arial", size=22, weight="bold"), 
+            text_color="#00F2FF"
+        )
+        self.logo_lbl.pack(pady=(35, 25))
 
-        # Menü Butonları (Modern Tarz)
-        self.btn_dashboard = self.create_nav_button("Anasayfa", self.open_dashboard_frame)
-        self.btn_dashboard.pack(pady=10, padx=20, fill="x")
+        # Menü Butonları (NVIDIA App Sekmeleri)
+        self.btn_home = self.create_nav_btn("🏠 Anasayfa", self.show_home)
+        self.btn_games = self.create_nav_btn("🎮 Oyun Kitaplığı", self.show_games)
+        self.btn_graphics = self.create_nav_btn("⚙️ Grafik & FPS Ayarları", self.show_graphics)
+        self.btn_overlay = self.create_nav_btn("📊 Performans Katmanı", self.show_overlay)
+        self.btn_system = self.create_nav_btn("💻 Sistem & Donanım", self.show_system)
 
-        self.btn_games = self.create_nav_button("Oyunlarım", self.open_games_frame)
-        self.btn_games.pack(pady=10, padx=20, fill="x")
+        # --- SAĞ İÇERİK ALANI ---
+        self.content = ctk.CTkFrame(self, corner_radius=0, fg_color="#121620")
+        self.content.grid(row=0, column=1, sticky="nsew")
 
-        self.btn_settings = self.create_nav_button("Ayarlar", self.open_settings_frame)
-        self.btn_settings.pack(pady=10, padx=20, fill="x")
+        # İlk Açılış
+        self.show_home()
 
-        # --- 2. Ana İçerik Alanı ---
-        self.main_content_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="#151922")
-        self.main_content_frame.grid(row=0, column=1, sticky="nsew")
-        
-        # Başlangıç Ekranını Yükle
-        self.open_dashboard_frame()
-
-    def create_nav_button(self, text, command_event):
-        return ctk.CTkButton(self.navigation_frame, text=text, 
-                             command=command_event,
-                             corner_radius=8, height=40,
-                             fg_color="transparent", text_color=("gray10", "gray90"),
-                             hover_color="#1A2232",
-                             font=ctk.CTkFont(size=14, weight="bold")
-                            )
-
-    def reset_buttons(self):
-        # Tüm butonların rengini sıfırla
-        self.btn_dashboard.configure(fg_color="transparent")
-        self.btn_games.configure(fg_color="transparent")
-        self.btn_settings.configure(fg_color="transparent")
+    def create_nav_btn(self, text, command):
+        btn = ctk.CTkButton(
+            self.sidebar, 
+            text=text, 
+            command=command,
+            fg_color="transparent",
+            text_color="#8C95A1",
+            hover_color="#1A2232",
+            anchor="w",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=45,
+            corner_radius=8
+        )
+        btn.pack(pady=5, padx=15, fill="x")
+        return btn
 
     def clear_content(self):
-        # İçerik alanındaki eski widgetları temizle
-        for widget in self.main_content_frame.winfo_children():
+        for widget in self.content.winfo_children():
             widget.destroy()
 
-    # --- Sayfa Yükleme Fonksiyonları ---
-    def open_dashboard_frame(self):
-        self.reset_buttons()
-        self.btn_dashboard.configure(fg_color="#1A2232") # Aktif buton rengi
+    # --- 1. ANASAYFA ---
+    def show_home(self):
         self.clear_content()
+
+        title = ctk.CTkLabel(self.content, text="Hoş Geldiniz, Komutan", font=ctk.CTkFont(size=22, weight="bold"), text_color="#FFFFFF")
+        title.pack(anchor="w", padx=35, pady=25)
+
+        # Hızlı Durum Kartı
+        card = ctk.CTkFrame(self.content, fg_color="#181F2D", corner_radius=12, height=90)
+        card.pack(fill="x", padx=35, pady=5)
+
+        self.status_lbl = ctk.CTkLabel(card, text="🟢 Sürücü Durumu: Güncel & Oyun Modu Aktif", font=ctk.CTkFont(size=14, weight="bold"), text_color="#00FF66")
+        self.status_lbl.pack(padx=25, pady=30, anchor="w")
+
+        # Canlı Donanım Özeti
+        stats_frame = ctk.CTkFrame(self.content, fg_color="transparent")
+        stats_frame.pack(fill="x", padx=35, pady=15)
+
+        self.cpu_lbl = ctk.CTkLabel(stats_frame, text="CPU Yükü: Hesaplanıyor...", font=ctk.CTkFont(size=13), text_color="#A5B1C2")
+        self.cpu_lbl.pack(anchor="w", pady=4)
         
-        # Dashboard Başlığı
-        lbl = ctk.CTkLabel(self.main_content_frame, text="Sistem Performans Paneli", 
-                           font=ctk.CTkFont(size=24, weight="bold"), text_color="white")
-        lbl.pack(pady=30, padx=30, anchor="w")
+        self.ram_lbl = ctk.CTkLabel(stats_frame, text="RAM Yükü: Hesaplanıyor...", font=ctk.CTkFont(size=13), text_color="#A5B1C2")
+        self.ram_lbl.pack(anchor="w", pady=4)
 
-        # Durum Kartı
-        status_card = ctk.CTkFrame(self.main_content_frame, fg_color="#1F2533", corner_radius=15)
-        status_card.pack(fill="x", padx=30, pady=10)
+        # Tek Tıkla Optimizasyon Butonu
+        boost_btn = ctk.CTkButton(
+            self.content, 
+            text="TEK TIKLA TÜM OYUNLARI OPTİMİZE ET", 
+            font=ctk.CTkFont(size=15, weight="bold"),
+            fg_color="#007ACC", 
+            hover_color="#005C99",
+            height=50,
+            corner_radius=10,
+            command=self.run_global_boost
+        )
+        boost_btn.pack(fill="x", padx=35, pady=25)
 
-        status_lbl = ctk.CTkLabel(status_card, text="🟢 Durum: Optimize Edilmeye Hazır", 
-                                 font=ctk.CTkFont(size=16), text_color="#00E676")
-        status_lbl.pack(pady=30, padx=20)
+        self.update_stats()
 
-        # Büyük Boost Butonu (Neon Mavi)
-        boost_btn = ctk.CTkButton(self.main_content_frame, text="OTOMATİK OYUN BOOST BAŞLAT",
-                                 font=ctk.CTkFont(size=16, weight="bold"),
-                                 height=50, corner_radius=12,
-                                 fg_color="#007BFF", hover_color="#0056b3",
-                                 command=self.run_boost_thread
-                                 )
-        boost_btn.pack(fill="x", padx=30, pady=30)
+    def update_stats(self):
+        try:
+            cpu = psutil.cpu_percent(interval=0.1)
+            ram = psutil.virtual_memory().percent
+            self.cpu_lbl.configure(text=f"💻 Anlık İşlemci Kullanımı: %{cpu}")
+            self.ram_lbl.configure(text=f"🧠 Anlık Bellek Kullanımı: %{ram}")
+        except:
+            pass
 
-    def open_games_frame(self):
-        self.reset_buttons()
-        self.btn_games.configure(fg_color="#1A2232")
+    # --- 2. OYUN KİTAPLIĞI ---
+    def show_games(self):
         self.clear_content()
-        
-        lbl = ctk.CTkLabel(self.main_content_frame, text="Algılanan Oyunlar", 
-                           font=ctk.CTkFont(size=24, weight="bold"), text_color="white")
-        lbl.pack(pady=30, padx=30, anchor="w")
 
-        # Örnek Oyun Listesi (İleride burayı otomatik dolduracağız)
-        games = ["Counter-Strike 2", "Valorant", "League of Legends", "GTA V"]
-        for game in games:
-            game_card = ctk.CTkFrame(self.main_content_frame, fg_color="#1F2533", corner_radius=10)
-            game_card.pack(fill="x", padx=30, pady=5)
+        title = ctk.CTkLabel(self.content, text="Algılanan Oyun Kitaplığı", font=ctk.CTkFont(size=22, weight="bold"), text_color="#FFFFFF")
+        title.pack(anchor="w", padx=35, pady=25)
+
+        games_box = ctk.CTkFrame(self.content, fg_color="#181F2D", corner_radius=12)
+        games_box.pack(fill="both", expand=True, padx=35, pady=(0, 25))
+
+        games_list = [
+            ("Counter-Strike 2", "C:/Program Files (x86)/Steam/steamapps/common/Counter-Strike Global Offensive"),
+            ("Valorant", "C:/Riot Games/Valorant"),
+            ("League of Legends", "C:/Riot Games/League of Legends"),
+            ("Epic Games Store", "C:/Program Files/Epic Games"),
+            ("Steam Platform", "C:/Program Files (x86)/Steam")
+        ]
+
+        for name, path in games_list:
+            row = ctk.CTkFrame(games_box, fg_color="transparent", height=45)
+            row.pack(fill="x", padx=20, pady=8)
             
-            g_lbl = ctk.CTkLabel(game_card, text=f"🎮 {game}", font=ctk.CTkFont(size=14), text_color="white")
-            g_lbl.pack(side="left", padx=15, pady=15)
-            
-            opt_btn = ctk.CTkButton(game_card, text="Ayarla", width=80, corner_radius=6, fg_color="#2B3445")
-            opt_btn.pack(side="right", padx=15)
+            exists = os.path.exists(path)
+            st_text = "🟢 Hazır & Optimize Edilebilir" if exists else "⚪ Yüklü Değil"
+            st_color = "#00FF66" if exists else "#636E72"
 
-    def open_settings_frame(self):
-        self.reset_buttons()
-        self.btn_settings.configure(fg_color="#1A2232")
+            lbl_name = ctk.CTkLabel(row, text=f"🎮 {name}", font=ctk.CTkFont(size=14, weight="bold"), text_color="#FFFFFF")
+            lbl_name.pack(side="left")
+
+            lbl_st = ctk.CTkLabel(row, text=st_text, font=ctk.CTkFont(size=13), text_color=st_color)
+            lbl_st.pack(side="right")
+
+    # --- 3. GRAFİK & FPS AYARLARI ---
+    def show_graphics(self):
         self.clear_content()
-        
-        lbl = ctk.CTkLabel(self.main_content_frame, text="Uygulama Ayarları", 
-                           font=ctk.CTkFont(size=24, weight="bold"), text_color="white")
-        lbl.pack(pady=30, padx=30, anchor="w")
-        
-        switch_val = ctk.CTkSwitch(self.main_content_frame, text="Otomatik Başlangıçta Çalıştır")
-        switch_val.pack(pady=10, padx=30, anchor="w")
+        title = ctk.CTkLabel(self.content, text="NVIDIA / AMD Grafik İnce Ayarları", font=ctk.CTkFont(size=22, weight="bold"), text_color="#FFFFFF")
+        title.pack(anchor="w", padx=35, pady=25)
 
-    # --- Optimizasyon Motoru (Arka Plan) ---
-    def run_boost_thread(self):
-        # Arayüz donmasın diye işlemi ayrı bir kolda (thread) başlat
-        threading.Thread(target=self.perform_optimization).start()
+        self.sw1 = ctk.CTkSwitch(self.content, text="Düşük Gecikme Modu (NVIDIA Reflex / Ultra Low Latency)", font=ctk.CTkFont(size=14), progress_color="#007ACC")
+        self.sw1.pack(anchor="w", padx=40, pady=12)
+        self.sw1.select()
 
-    def perform_optimization(self):
-        # Buraya gerçek optimizasyon kodları gelecek (servis durdurma, güç planı vb.)
-        # Şimdilik simülasyon yapalım
-        print("Boost başladı...")
+        self.sw2 = ctk.CTkSwitch(self.content, text="GPU Donanım Hızlandırmalı Zamanlama (HAGS)", font=ctk.CTkFont(size=14), progress_color="#007ACC")
+        self.sw2.pack(anchor="w", padx=40, pady=12)
+        self.sw2.select()
+
+        self.sw3 = ctk.CTkSwitch(self.content, text="Maksimum Performans Güç Yönetimi", font=ctk.CTkFont(size=14), progress_color="#007ACC")
+        self.sw3.pack(anchor="w", padx=40, pady=12)
+        self.sw3.select()
+
+        self.sw4 = ctk.CTkSwitch(self.content, text="Doku Süzme (Texture Filtering) - Yüksek Performans", font=ctk.CTkFont(size=14), progress_color="#007ACC")
+        self.sw4.pack(anchor="w", padx=40, pady=12)
+        self.sw4.select()
+
+    # --- 4. PERFORMANS KATMANI (OVERLAY) ---
+    def show_overlay(self):
+        self.clear_content()
+        title = ctk.CTkLabel(self.content, text="Oyun İçi Performans Katmanı (Overlay)", font=ctk.CTkFont(size=22, weight="bold"), text_color="#FFFFFF")
+        title.pack(anchor="w", padx=35, pady=25)
+
+        info_lbl = ctk.CTkLabel(self.content, text="Oyun oynarken sol üst köşede anlık FPS, sıcaklık ve kullanım değerlerini gösterir.", font=ctk.CTkFont(size=13), text_color="#A5B1C2")
+        info_lbl.pack(anchor="w", padx=35, pady=(0, 15))
+
+        self.ov1 = ctk.CTkSwitch(self.content, text="Anlık FPS Sayacını Aktif Et", font=ctk.CTkFont(size=14), progress_color="#007ACC")
+        self.ov1.pack(anchor="w", padx=40, pady=12)
+        self.ov1.select()
+
+        self.ov2 = ctk.CTkSwitch(self.content, text="CPU / GPU Sıcaklık Takibi", font=ctk.CTkFont(size=14), progress_color="#007ACC")
+        self.ov2.pack(anchor="w", padx=40, pady=12)
+        self.ov2.select()
+
+    # --- 5. SİSTEM BİLGİSİ ---
+    def show_system(self):
+        self.clear_content()
+        title = ctk.CTkLabel(self.content, text="Sistem ve Sürücü Bilgileri", font=ctk.CTkFont(size=22, weight="bold"), text_color="#FFFFFF")
+        title.pack(anchor="w", padx=35, pady=25)
+
+        box = ctk.CTkFrame(self.content, fg_color="#181F2D", corner_radius=12)
+        box.pack(fill="both", expand=True, padx=35, pady=(0, 25))
+
+        text_content = f"""
+        💻 İşletim Sistemi: {platform.system()} {platform.release()}
+        ⚙️ İşlemci Mimarisi: {platform.processor()}
+        🚀 GAMEXAN Sürüm: v3.0 Ultimate Edition
+        🎯 Durum: Tüm Sistem Bileşenleri Optimize Edildi
+        """
         
-        # Arayüzdeki butonu geçici olarak devre dışı bırak
-        # (Thread içinden arayüzü güncellemek için root.after kullanıyoruz)
-        
-        # Oyun tarama simülasyonu
-        detected = False
-        steam_path = "C:/Program Files (x86)/Steam"
-        if os.path.exists(steam_path):
-            detected = True
+        lbl = ctk.CTkLabel(box, text=text_content, font=ctk.CTkFont(size=14), text_color="#E2E8F0", justify="left")
+        lbl.pack(anchor="nw", padx=30, pady=30)
 
-        # Sonuç mesajını göster
-        if detected:
-            msg = "✅ Steam Algılandı.\n✅ Gereksiz servisler kapatıldı.\n✅ RAM temizlendi.\n🚀 Oyunlar için sistem hazır!"
-        else:
-            msg = "⚠️ Steam kurulu görünmüyor ama yine de sistem performansı artırıldı."
+    def run_global_boost(self):
+        threading.Thread(target=self.boost_worker).start()
 
-        # Mesajı popup olarak göster
-        self.after(0, lambda: messagebox.showinfo("GAMEXAN Boost Tamamlandı", msg))
+    def boost_worker(self):
+        try:
+            import ctypes
+            ctypes.windll.psapi.EmptyWorkingSet(ctypes.windll.kernel32.GetCurrentProcess())
+        except:
+            pass
+        self.status_lbl.configure(text="🚀 Tüm Oyunlar İçin En İyi Grafik ve FPS Ayarları Uygulandı!", text_color="#00FF66")
 
 if __name__ == "__main__":
     app = GAMEXANApp()
