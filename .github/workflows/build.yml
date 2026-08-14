@@ -20,9 +20,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyinstaller customtkinter
 
-    - name: Build with PyInstaller
-      run: |
-        pyinstaller --noconsole --onefile main.py
+   - name: Build with PyInstaller
+  run: |
+    pyinstaller --noconsole --onefile --hidden-import=psutil --hidden-import=customtkinter main.py
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
